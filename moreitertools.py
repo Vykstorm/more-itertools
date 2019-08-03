@@ -1,6 +1,7 @@
 
 from typing import *
-#from itertools impor
+from itertools import islice
+
 
 T_co = TypeVar('T', covariant=True)
 
@@ -47,9 +48,29 @@ def last(x: Iterable[T_co]) -> T_co:
         raise ValueError('Iterable is empty')
 
 
+def first_true(x: Iterable[T_co], pred: Optional[Callable[[T_co], Any]]=None) -> T_co:
+    '''
+    Returns the first item in the given iterable such that the predicate is evaluated to True.
+    If no predicate is specified, bool is used by default
+    Its equivalent to next(filter(pred, x))
+
+    In the case where none of the items satisfies the predicate, raises ValueError exception
+    '''
+    if not isinstance(x, Iterable):
+        raise TypeError('First argument must be an iterable')
+    if pred is not None and not callable(pred):
+        raise TypeError('Predicate must be a callable object')
+
+    try:
+        return next(filter(pred, x))
+    except StopIteration:
+        raise ValueError('No item found satisfies the predicate')
+
+
+
 def nth(x: Iterable[T_co], n: int) -> T_co:
     '''
-    Takes an iterable as argument and returns its item at the nth position.
+    Takes an iterable as argument and returns the item at the nth position.
     If the number of items in the iterable is less or equal than n, raises IndexError exception
     n can be a negative number. In that case, the result of this call its equivalent to nth(x, len(tuple(x))+n)
 
@@ -79,11 +100,7 @@ def nth(x: Iterable[T_co], n: int) -> T_co:
             return tuple(x)[n]
 
         try:
-            it = iter(x)
-            item = next(it)
-            while n > 0:
-                item, n = next(it), n-1
-            return item
+            return next(islice(x, n, None))
         except StopIteration:
             raise IndexError
 
