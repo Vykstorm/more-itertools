@@ -1,6 +1,6 @@
 
 from typing import *
-from itertools import islice
+from itertools import islice, chain, filterfalse
 
 # Type vars for parameter annotations
 T_co = TypeVar('T', covariant=True)
@@ -13,19 +13,21 @@ def _check_iterable(x):
 
 def _check_default(args):
     if len(args) > 1:
-        raise TypeError(f'Expected at most one varadic argument, got {len(args)}')
+        raise TypeError(f'Expected at most 1 varadic argument, got {len(args)}')
 
 def _check_predicate(pred):
     if pred is not None and not callable(pred):
         raise TypeError(f'{type(x).__name__} is not callable')
 
 
+# Recipes
 
 def first(x: Iterable[T_co], *args) -> T_co:
     '''
     Takes an iterable as argument and retrieves the first element.
-    Its equivalent to next(iter(x), *args)
-    If x has no items, returns the default value if it is provided or raises ValueError exception otherwise.
+    Its roughly equivalent to next(iter(x), *args)
+    If x has no items, returns the default value if present (provided in the varadic arguments)
+    or raises ValueError exception otherwise.
     e.g:
     first([1,2,3]) -> 1
     first([]) -> ValueError
@@ -44,8 +46,9 @@ def first(x: Iterable[T_co], *args) -> T_co:
 def last(x: Iterable[T_co], *args) -> T_co:
     '''
     Takes an iterable as argument and retrieves the last element.
-    Its equivalent to next(reversed(tuple(x)), *args)
-    If x has no items, returns the default value if it is provided or raises ValueError exception otherwise.
+    Its roughly equivalent to next(reversed(tuple(x)), *args)
+    If x has no items, returns the default value if provided (in the varadic arguments list)
+    or raises a ValueError exception otherwise.
     e.g:
     last([1,2,3]) -> 3
     last([]) -> ValueError
@@ -83,9 +86,9 @@ def first_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     Returns the first item in the given iterable such that the predicate is evaluated to True.
     If no predicate is specified, bool is used by default.
 
-    Its equivalent to next(filter(pred, x), *args)
-    In the case where none of the items satisfies the predicate, returns the default value if it is provided or
-    raises ValueError exception otherwise.
+    Its roughly equivalent to next(filter(pred, x), *args)
+    In the case where none of the items satisfies the predicate or the iterable is empty,
+    returns the default value if provided (in the varadic arguments) or raises ValueError exception otherwise.
     e.g:
     first_true([None, False, 0, 10]) -> 10
     first_true([1, 4, 9], pred=lambda x: x > 5) -> 9
@@ -103,11 +106,59 @@ def first_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
 
 
 
+def first_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=None) -> T_co:
+    '''
+    Its the counterpart of the function first_true: Returns the first item in the given iterable
+    that make the predicate evaluate to False.
+    Its roughly equivalent to next(filterfalse(pred, x), *args)
+    In the case where all the items satisfies the predicate or the iterable is empty,
+    returns the default value if provided (in the varadic arguments) or raises ValueError exception otherwise.
+    e.g:
+    first_false([1, 0, 2]) -> 0
+    first_false([1, 2, 3]) -> Value error
+    first_false([1, 2, 3], pred=lambda x: x < 2) -> 2
+    first_false([1, 2, 3], None) -> None
+    '''
+    _check_iterable(x)
+    _check_default(args)
+    _check_predicate(pred)
+
+    try:
+        return next(filterfalse(pred, x), *args)
+    except StopIteration:
+        raise ValueError('All items satisfies the predicate')
+
+
+
+def last_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=None) -> T_co:
+    '''
+    Returns the last item in the given iterable such that the predicate is evaluated to True.
+    If no predicate is specified, bool is used by default.
+
+    Its roughly equivalent to next(filter(pred, reversed(tuple(x))), *args)
+    In the case where none of the items satisfies the predicate or the iterable is empty,
+    returns the default value if provided (in the varadic arguments) or raises ValueError exception otherwise.
+
+    e.g:
+    last_true([False, 1, 0, None]) -> 1
+    last_true([1, 3, 5, 9], pred=lambda x: x > 3) -> 9
+    last_true([False, 0]) -> ValueError
+    last_true([False, 0], None) -> None
+    '''
+    _check_iterable(x)
+    _check_default(args)
+    _check_predicate(pred)
+    return first_true(reversediter(x), *args, pred=pred)
+
+
+
 def nth(x: Iterable[T_co], n: int, *args) -> T_co:
     '''
     Takes an iterable as argument and returns the item at the nth position.
-    If the number of items in the iterable is less or equal than n, returns the default value if provided or raises ValueError exception otherwise.
-    n can be a negative number. In that case, the result of this call its equivalent to nth(x, len(tuple(x))+n, *args)
+    n can be a negative number. In that case, this call is transformed into nth(x, len(tuple(x))+n, *args)
+    If the number of items in the iterable is less or equal than n, returns the default value if provided (in the varadic arguments list)
+    or raises ValueError exception otherwise.
+
     e.g:
     nth('hello', 1) -> 'e'
     nth('world', -2) -> 'l'
