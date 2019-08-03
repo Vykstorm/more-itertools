@@ -2,8 +2,22 @@
 from typing import *
 from itertools import islice
 
-
+# Type vars for parameter annotations
 T_co = TypeVar('T', covariant=True)
+
+
+# Helper methods
+def _check_iterable(x):
+    if not isinstance(x, Iterable):
+        raise TypeError(f'{type(x).__name__} is not iterable')
+
+def _check_default(args):
+    if len(args) > 1:
+        raise TypeError(f'Expected at most one varadic argument, got {len(args)}')
+
+def _check_predicate(pred):
+    if pred is not None and not callable(pred):
+        raise TypeError(f'{type(x).__name__} is not callable')
 
 
 
@@ -17,11 +31,8 @@ def first(x: Iterable[T_co], *args) -> T_co:
     first([]) -> ValueError
     first([], default=None) -> None
     '''
-    if not isinstance(x, Iterable):
-        raise TypeError('Argument must be an iterable')
-
-    if len(args) > 1:
-        raise TypeError(f'Expected at most one varadic argument, got {len(args)}')
+    _check_iterable(x)
+    _check_default(args)
 
     try:
         return next(iter(x), *args)
@@ -44,11 +55,8 @@ def last(x: Iterable[T_co], *args) -> T_co:
     be more efficient as it doesnt need to consume all the items from the iterable to get
     only the last one.
     '''
-    if not isinstance(x, Iterable):
-        raise TypeError('Argument must be an iterable')
-
-    if len(args) > 1:
-        raise TypeError(f'Expected at most one varadic argument, got {len(args)}')
+    _check_iterable(x)
+    _check_default(args)
 
     try:
         if isinstance(x, Reversible):
@@ -84,14 +92,9 @@ def first_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     first_true([1, 4, 9], pred=lambda x: x > 9) -> ValueError
     first_true([1, 4, 9], None, pred=lambda x: x > 9) -> None
     '''
-    if not isinstance(x, Iterable):
-        raise TypeError('First argument must be an iterable')
-
-    if pred is not None and not callable(pred):
-        raise TypeError('Predicate must be a callable object')
-
-    if len(args) > 1:
-        raise TypeError(f'Expected at most one varadic argument, got {len(args)}')
+    _check_iterable(x)
+    _check_default(args)
+    _check_predicate(pred)
 
     try:
         return next(filter(pred, x), *args)
@@ -114,14 +117,11 @@ def nth(x: Iterable[T_co], n: int, *args) -> T_co:
     Note: If the given argument implements the Sequence interface,
     this method is more efficient as it will retrieve the nth item using __getitem__ method
     '''
-    if not isinstance(x, Iterable):
-        raise TypeError('First argument must be an iterable')
+    _check_iterable(x)
+    _check_default(args)
 
     if not isinstance(n, int):
         raise TypeError('Second argument must be an integer')
-
-    if len(args) > 1:
-        raise TypeError(f'Expected at most one varadic argument, got {len(args)}')
 
     try:
         if isinstance(x, Sized):
@@ -161,7 +161,5 @@ def reversediter(x: Iterable[T_co]) -> Iterator[T_co]:
     Note: If the given argument implements the method __reversed__, this function is more
     efficient, as it will return reversed(x) directly
     '''
-    if not isinstance(x, Iterable):
-        raise TypeError('Argument must be an iterable')
-
+    _check_iterable(x)
     return reversed(x if isinstance(x, Reversible) else tuple(x))
