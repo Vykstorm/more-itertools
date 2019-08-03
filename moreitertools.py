@@ -45,3 +45,17 @@ def last(x: Iterable[T_co]) -> T_co:
         return item
     except StopIteration:
         raise ValueError('Iterable is empty')
+
+
+def reversediter(x: Iterable[T_co]) -> Iterator[T_co]:
+    '''
+    This method takes an iterable as argument and returns and iterator that
+    retrieves its items in reversed order.
+    Its equivalent to reversed(tuple(x))
+
+    Note: If the given argument implements the method __reversed__, this function is more
+    efficient, as it will return reversed(x) directly
+    '''
+    if not isinstance(x, Iterable):
+        raise TypeError('Argument must be an iterable')
+    return reversed(x if isinstance(x, Reversible) else tuple(x))
