@@ -47,6 +47,50 @@ def last(x: Iterable[T_co]) -> T_co:
         raise ValueError('Iterable is empty')
 
 
+def nth(x: Iterable[T_co], n: int) -> T_co:
+    '''
+    Takes an iterable as argument and returns its item at the nth position.
+    If the number of items in the iterable is less or equal than n, raises IndexError exception
+    n can be a negative number. In that case, the result of this call its equivalent to nth(x, len(tuple(x))+n)
+
+    Note: If the given argument implements the Sequence interface,
+    this method is more efficient as it will retrieve the nth item using __getitem__ method
+    '''
+    if not isinstance(x, Iterable):
+        raise TypeError('First argument must be an iterable')
+    if not isinstance(n, int):
+        raise TypeError('Second argument must be an integer')
+
+    try:
+        if isinstance(x, Sized):
+            l = len(x)
+            if n < 0:
+                n += l
+            if n < 0 or n >= l:
+                raise IndexError
+
+            if isinstance(x, Sequence):
+                return x[n]
+
+            if isinstance(x, Reversible) and n >= l//2:
+                n, x = l-n-1, reversed(x)
+
+        elif n < 0:
+            return tuple(x)[n]
+
+        try:
+            it = iter(x)
+            item = next(it)
+            while n > 0:
+                item, n = next(it), n-1
+            return item
+        except StopIteration:
+            raise IndexError
+
+    except IndexError:
+        raise IndexError('index out of range')
+
+
 def reversediter(x: Iterable[T_co]) -> Iterator[T_co]:
     '''
     This method takes an iterable as argument and returns and iterator that
