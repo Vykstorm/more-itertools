@@ -17,7 +17,7 @@ def _check_default(args):
 
 def _check_predicate(pred):
     if pred is not None and not callable(pred):
-        raise TypeError(f'{type(x).__name__} is not callable')
+        raise TypeError(f'{type(pred).__name__} is not callable')
 
 
 # Recipes
