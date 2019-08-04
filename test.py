@@ -217,10 +217,34 @@ class TestRecipes(TestCase):
                     self.assertIs(nth(X, k, default), default)
 
 
+
     def test_reversediter(self):
         # tuple(reversediter(X)) == tuple(reversed(tuple(X))) for any iterable X
         for X in self.iterables:
             self.assertEqual(tuple(reversediter(X)), tuple(reversed(tuple(X))))
+
+
+
+    def test_head(self):
+        # tuple(head(X, n)) == tuple(X)[:n] with n >= 0 for any iterable X
+        for X, n in zip(self.iterables, range(0, 6)):
+            self.assertTrue(all(starmap(is_, zip(head(X, n), islice(X, n)))))
+
+        # tuple(head(X, n)) == tuple(tail(X, -n)) with n < 0 for any iterable X
+        for X, n in zip(self.iterables, map(neg, range(1, 6))):
+            self.assertTrue(all(starmap(is_, zip(head(X, n), tail(X, -n)))))
+
+
+
+    def test_tail(self):
+        # tuple(tail(X, n)) == tuple(X)[-n:] with n >= 0 for any iterable X
+        for X, n in zip(self.iterables, range(0, 6)):
+            self.assertTrue(all(starmap(is_, zip(tail(X, n), tuple(X)[-n:]))))
+
+        # tuple(tail(X, n)) == tuple(head(X, -n)) with n < 0 for any iterable X
+        for X, n in zip(self.iterables, map(neg, range(1, 6))):
+            self.assertTrue(all(starmap(is_, zip(tail(X, n), head(X, -n)))))
+
 
 
 if __name__ == '__main__':
