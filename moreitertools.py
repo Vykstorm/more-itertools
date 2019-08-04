@@ -8,18 +8,27 @@ T_co = TypeVar('T', covariant=True)
 
 
 # Helper methods
-def _check_iterable(x):
+def _check_iterable(x, param=None):
     if not isinstance(x, Iterable):
-        raise TypeError(f'{type(x).__name__} is not iterable')
+        if param is None:
+            raise TypeError(f'{type(x).__name__} is not iterable')
+        raise TypeError(f'{param} must be an iterable, got {type(x).__name__}')
 
-def _check_default(args):
-    if len(args) > 1:
+def _check_varadics(args, n=1):
+    if len(args) > n:
         raise TypeError(f'Expected at most 1 varadic argument, got {len(args)}')
 
-def _check_predicate(pred):
-    if pred is not None and not callable(pred):
-        raise TypeError(f'{type(pred).__name__} is not callable')
+def _check_predicate(x, param=None):
+    if x is not None and not callable(x):
+        if param is None:
+            raise TypeError(f'{type(x).__name__} is not callable')
+        raise TypeError(f'{param} must be a callable, got {type(x).__name__}')
 
+def _check_integer(x, param=None):
+    if not isinstance(x, int):
+        if param is None:
+            raise TypeError(f'{type(x).__name__} is not an integer')
+        raise TypeError(f'{param} must be an integer, got {type(x).__name__}')
 
 
 # Recipes
@@ -36,7 +45,7 @@ def first(x: Iterable[T_co], *args) -> T_co:
     first([], default=None) -> None
     '''
     _check_iterable(x)
-    _check_default(args)
+    _check_varadics(args)
 
     try:
         return next(iter(x), *args)
@@ -61,7 +70,7 @@ def last(x: Iterable[T_co], *args) -> T_co:
     only the last one.
     '''
     _check_iterable(x)
-    _check_default(args)
+    _check_varadics(args)
 
     try:
         if isinstance(x, Reversible):
@@ -98,7 +107,7 @@ def first_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     first_true([1, 4, 9], None, pred=lambda x: x > 9) -> None
     '''
     _check_iterable(x)
-    _check_default(args)
+    _check_varadics(args)
     _check_predicate(pred)
 
     try:
@@ -122,7 +131,7 @@ def first_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=
     first_false([1, 2, 3], None) -> None
     '''
     _check_iterable(x)
-    _check_default(args)
+    _check_varadics(args)
     _check_predicate(pred)
 
     try:
@@ -148,7 +157,7 @@ def last_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=No
     last_true([False, 0], None) -> None
     '''
     _check_iterable(x)
-    _check_default(args)
+    _check_varadics(args)
     _check_predicate(pred)
     return first_true(reversediter(x), *args, pred=pred)
 
@@ -170,7 +179,7 @@ def last_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     last_false([4, 5, 6], pred=lambda x: x > 5) -> 5
     '''
     _check_iterable(x)
-    _check_default(args)
+    _check_varadics(args)
     _check_predicate(pred)
     return first_false(reversediter(x), *args, pred=pred)
 
@@ -193,10 +202,8 @@ def nth(x: Iterable[T_co], n: int, *args) -> T_co:
     this method is more efficient as it will retrieve the nth item using __getitem__ method
     '''
     _check_iterable(x)
-    _check_default(args)
-
-    if not isinstance(n, int):
-        raise TypeError('Second argument must be an integer')
+    _check_varadics(args)
+    _check_integer(n, 'n')
 
     try:
         if isinstance(x, Sized):
@@ -252,8 +259,7 @@ def head(x: Iterable[T_co], n: int) -> Iterator[T_co]:
     head(range(0, 50, 2), -2) -> 46, 48
     '''
     _check_iterable(x)
-    if not isinstance(n, int):
-        raise TypeError('n must be a number')
+    _check_integer(n, 'n')
 
     if n >= 0:
         return islice(x, n)
@@ -279,6 +285,5 @@ def tail(x: Iterable[T_co], n: int) -> Iterator[T_co]:
     tail(range(20), 3) -> 17, 18, 19
     '''
     _check_iterable(x)
-    if not isinstance(n, int):
-        raise TypeError('n must be a number')
+    _check_integer(n, 'n')
     return head(x, -n)
