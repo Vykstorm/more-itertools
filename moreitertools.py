@@ -151,7 +151,7 @@ def last_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=No
     return first_true(reversediter(x), *args, pred=pred)
 
 
-# last_false
+
 def last_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=None) -> T_co:
     '''
     Its the counterpart of the function last_true: Returns the last item in the given iterable
@@ -173,12 +173,13 @@ def last_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     return first_false(reversediter(x), *args, pred=pred)
 
 
+
 def nth(x: Iterable[T_co], n: int, *args) -> T_co:
     '''
     Takes an iterable as argument and returns the item at the nth position.
     n can be a negative number. In that case, this call is transformed into nth(x, len(tuple(x))+n, *args)
     If the number of items in the iterable is less or equal than n, returns the default value if provided (in the varadic arguments list)
-    or raises ValueError exception otherwise.
+    or raises IndexError exception otherwise.
 
     e.g:
     nth('hello', 1) -> 'e'
