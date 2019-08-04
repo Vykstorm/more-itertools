@@ -1,6 +1,7 @@
 
 from typing import *
 from itertools import islice, chain, filterfalse
+from collections import deque
 
 # Type vars for parameter annotations
 T_co = TypeVar('T', covariant=True)
@@ -18,6 +19,7 @@ def _check_default(args):
 def _check_predicate(pred):
     if pred is not None and not callable(pred):
         raise TypeError(f'{type(pred).__name__} is not callable')
+
 
 
 # Recipes
@@ -236,3 +238,47 @@ def reversediter(x: Iterable[T_co]) -> Iterator[T_co]:
     '''
     _check_iterable(x)
     return reversed(x if isinstance(x, Reversible) else tuple(x))
+
+
+
+def head(x: Iterable[T_co], n: int) -> Iterator[T_co]:
+    '''
+    Creates an iterator that retrieves the first n items from the given iterable.
+    Its equivalent to islice(x, n) if n is greater or equal than zero.
+    Otherwise, its equivalent to tail(x, -n)
+
+    e.g:
+    head(range(0, 50), 3) -> 1, 2, 3
+    head(range(0, 50, 2), -2) -> 46, 48
+    '''
+    _check_iterable(x)
+    if not isinstance(n, int):
+        raise TypeError('n must be a number')
+
+    if n >= 0:
+        return islice(x, n)
+
+    n = -n
+    d = deque(maxlen=n)
+
+    if isinstance(x, Reversible):
+        d.extendleft(islice(reversed(x), n))
+    else:
+        d.extend(x)
+    return iter(d)
+
+
+
+def tail(x: Iterable[T_co], n: int) -> Iterator[T_co]:
+    '''
+    Creates an iterator that retrieves the last n items from the given iterable.
+    Its equivalent to iter(tuple(x)[-n:]) if n is greater than zero. Otherwise, its the same as head(x, -n)
+
+    e.g:
+    ''.join(tail('hello world', 5)) -> 'world'
+    tail(range(20), 3) -> 17, 18, 19
+    '''
+    _check_iterable(x)
+    if not isinstance(n, int):
+        raise TypeError('n must be a number')
+    return head(x, -n)
