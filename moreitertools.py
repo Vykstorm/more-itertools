@@ -151,6 +151,27 @@ def last_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=No
     return first_true(reversediter(x), *args, pred=pred)
 
 
+# last_false
+def last_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=None) -> T_co:
+    '''
+    Its the counterpart of the function last_true: Returns the last item in the given iterable
+    such that the predicate is evaluated to True.
+    If no predicate is specified, bool is used by default.
+
+    Its roughly equivalent to next(filterfalse(pred, reversed(tuple(x))), *args)
+    In the case where all the items satisfies the predicate or the iterable is empty,
+    returns the default value if provided (in the varadic arguments) or raises ValueError exception otherwise.
+
+    e.g:
+    last_false([1, 0, 2, False, 3]) -> False
+    last_false([1, 2, 3]) -> ValueError
+    last_false([4, 5, 6], pred=lambda x: x > 5) -> 5
+    '''
+    _check_iterable(x)
+    _check_default(args)
+    _check_predicate(pred)
+    return first_false(reversediter(x), *args, pred=pred)
+
 
 def nth(x: Iterable[T_co], n: int, *args) -> T_co:
     '''
