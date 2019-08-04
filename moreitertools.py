@@ -1,13 +1,30 @@
 
 from typing import *
 from itertools import islice, chain, filterfalse
+from functools import wraps
 from collections import deque
 
 # Type vars for parameter annotations
-T_co = TypeVar('T', covariant=True)
+T_co = TypeVar('T_co', covariant=True)
 
 
-# Helper methods
+# Helper classes & methods
+class checker:
+    def __init__(self, unchecked):
+        self.unchecked = unchecked
+
+    def __call__(self, check):
+        unchecked = self.unchecked
+
+        @wraps(unchecked)
+        def wrapper(*args, **kwargs):
+            check(*args, **kwargs)
+            return unchecked(*args, **kwargs)
+
+        wrapper.unchecked = unchecked
+        return wrapper
+
+
 def _check_iterable(x, param=None):
     if not isinstance(x, Iterable):
         if param is None:
@@ -44,9 +61,6 @@ def first(x: Iterable[T_co], *args) -> T_co:
     first([]) -> ValueError
     first([], default=None) -> None
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-
     try:
         return next(iter(x), *args)
     except StopIteration:
@@ -69,9 +83,6 @@ def last(x: Iterable[T_co], *args) -> T_co:
     be more efficient as it doesnt need to consume all the items from the iterable to get
     only the last one.
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-
     try:
         if isinstance(x, Reversible):
             return next(reversed(x), *args)
@@ -106,10 +117,6 @@ def first_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     first_true([1, 4, 9], pred=lambda x: x > 9) -> ValueError
     first_true([1, 4, 9], None, pred=lambda x: x > 9) -> None
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-    _check_predicate(pred)
-
     try:
         return next(filter(pred, x), *args)
     except StopIteration:
@@ -130,10 +137,6 @@ def first_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=
     first_false([1, 2, 3], pred=lambda x: x < 2) -> 2
     first_false([1, 2, 3], None) -> None
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-    _check_predicate(pred)
-
     try:
         return next(filterfalse(pred, x), *args)
     except StopIteration:
@@ -156,10 +159,7 @@ def last_true(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=No
     last_true([False, 0]) -> ValueError
     last_true([False, 0], None) -> None
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-    _check_predicate(pred)
-    return first_true(reversediter(x), *args, pred=pred)
+    return first_true.unchecked(reversediter(x), *args, pred=pred)
 
 
 
@@ -178,10 +178,7 @@ def last_false(x: Iterable[T_co], *args, pred: Optional[Callable[[T_co], Any]]=N
     last_false([1, 2, 3]) -> ValueError
     last_false([4, 5, 6], pred=lambda x: x > 5) -> 5
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-    _check_predicate(pred)
-    return first_false(reversediter(x), *args, pred=pred)
+    return first_false.unchecked(reversediter(x), *args, pred=pred)
 
 
 
@@ -201,10 +198,6 @@ def nth(x: Iterable[T_co], n: int, *args) -> T_co:
     Note: If the given argument implements the Sequence interface,
     this method is more efficient as it will retrieve the nth item using __getitem__ method
     '''
-    _check_iterable(x)
-    _check_varadics(args)
-    _check_integer(n, 'n')
-
     try:
         if isinstance(x, Sized):
             l = len(x)
@@ -243,7 +236,6 @@ def reversediter(x: Iterable[T_co]) -> Iterator[T_co]:
     Note: If the given argument implements the method __reversed__, this function is more
     efficient, as it will return reversed(x) directly
     '''
-    _check_iterable(x)
     return reversed(x if isinstance(x, Reversible) else tuple(x))
 
 
@@ -258,9 +250,6 @@ def head(x: Iterable[T_co], n: int) -> Iterator[T_co]:
     head(range(0, 50), 3) -> 1, 2, 3
     head(range(0, 50, 2), -2) -> 46, 48
     '''
-    _check_iterable(x)
-    _check_integer(n, 'n')
-
     if n >= 0:
         return islice(x, n)
 
@@ -284,6 +273,73 @@ def tail(x: Iterable[T_co], n: int) -> Iterator[T_co]:
     ''.join(tail('hello world', 5)) -> 'world'
     tail(range(20), 3) -> 17, 18, 19
     '''
+    return head.unchecked(x, -n)
+
+
+
+
+
+# Recipe input argument checkers
+
+@checker(first)
+def first(x, *args):
+    _check_iterable(x)
+    _check_varadics(args)
+
+
+@checker(last)
+def last(x, *args):
+    _check_iterable(x)
+    _check_varadics(args)
+
+
+@checker(first_true)
+def first_true(x, *args, pred=None):
+    _check_iterable(x)
+    _check_varadics(args)
+    _check_predicate(pred)
+
+
+@checker(first_false)
+def first_false(x, *args, pred=None):
+    _check_iterable(x)
+    _check_varadics(args)
+    _check_predicate(pred)
+
+
+@checker(last_true)
+def last_true(x, *args, pred=None):
+    _check_iterable(x)
+    _check_varadics(args)
+    _check_predicate(pred)
+
+
+@checker(last_false)
+def last_false(x, *args, pred=None):
+    _check_iterable(x)
+    _check_varadics(args)
+    _check_predicate(pred)
+
+
+@checker(nth)
+def nth(x, n, *args):
+    _check_iterable(x)
+    _check_varadics(args)
+    _check_integer(n, 'n')
+
+
+@checker(reversediter)
+def reversediter(x):
+    _check_iterable(x)
+
+
+@checker(head)
+def head(x, n):
     _check_iterable(x)
     _check_integer(n, 'n')
-    return head(x, -n)
+
+
+@checker(tail)
+def tail(x, n):
+    _check_iterable(x)
+    _check_integer(n, 'n')
