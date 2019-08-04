@@ -207,6 +207,14 @@ class TestRecipes(TestCase):
             for k in range(1, len(tuple(X))+1):
                 self.assertIs(nth(X, -k), nth(X, len(tuple(X))-k))
 
+        # nth(X, k) raises IndexError and nth(X, k, default) is default
+        # if k >= len(tuple(X)) or k < -len(tuple(X)) and X is not an empty iterable
+        for X in self.filled_iterables:
+            n = len(tuple(X))
+            for k in chain(map(neg, range(n+1, n+4)), range(n, n+4)):
+                self.assertRaises(IndexError, nth, X, k)
+                for default in self.values:
+                    self.assertIs(nth(X, k, default), default)
 
 
     def test_reversediter(self):
