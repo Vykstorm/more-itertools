@@ -302,7 +302,7 @@ def quantify(x: Iterable[T_co], pred: Optional[Callable[[T_co], Any]]=None) -> i
 def ncycles(x: Iterable[T_co], n: int) -> Iterator[T_co]:
     '''
     Returns a sequence with all the elements given in the iterable n times.
-    Equivalent to chain.from_iterable(repeat(tuple(x)))
+    Equivalent to chain.from_iterable(repeat(tuple(x), n))
 
     e.g:
     ''.join(ncycles('abc', 2)) -> 'abcabc'
@@ -315,12 +315,16 @@ def ncycles(x: Iterable[T_co], n: int) -> Iterator[T_co]:
         return
     if n == 1:
         yield from iter(x)
+        return
 
     if not isinstance(x, Collection):
         x = tuple(x)
 
     for k in range(n):
         yield from iter(x)
+
+
+
 
 
 # Recipe input argument checkers
