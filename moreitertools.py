@@ -1,7 +1,7 @@
 
 from typing import *
 from itertools import islice, chain, filterfalse
-from functools import wraps
+from functools import wraps, partial
 from collections import deque
 from operator import truth
 
@@ -38,7 +38,12 @@ def _check_varadics(args, n=1):
         raise TypeError(f'Expected at most 1 varadic argument, got {len(args)}')
 
 def _check_predicate(x, param=None):
-    if x is not None and not callable(x):
+    if x is None:
+        return
+    _check_callable(x, param)
+
+def _check_callable(x, param=None):
+    if not callable(x):
         if param is None:
             raise TypeError(f'{type(x).__name__} is not callable')
         raise TypeError(f'{param} must be a callable, got {type(x).__name__}')
@@ -325,6 +330,18 @@ def ncycles(x: Iterable[T_co], n: int) -> Iterator[T_co]:
 
 
 
+def repeatfunc(f, n: int, *args, **kwargs) -> Iterator:
+    '''
+    Calls the given function repeteadly n times with the given positional and keyword arguments.
+    e.g:
+    repeatfunc(random.randrange, 5, 0, 10) -> 7, 3, 9, 1, 5
+    '''
+    if n == 0:
+        return
+
+    f = partial(f, *args, **kwargs)
+    for k in range(n):
+        yield f()
 
 
 # Recipe input argument checkers
@@ -402,4 +419,10 @@ def quantify(x, pred=None):
 @checker(ncycles)
 def ncycles(x, n):
     _check_iterable(x)
+    _check_integer(n, 'n')
+
+
+@checker(repeatfunc)
+def repeatfunc(func, n):
+    _check_callable(func)
     _check_integer(n, 'n')
