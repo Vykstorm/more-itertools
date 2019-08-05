@@ -431,6 +431,6 @@ def ncycles(x, n):
 
 
 @checker(repeatfunc)
-def repeatfunc(func, n):
+def repeatfunc(func, n, *args, **kwargs):
     _check_callable(func)
     _check_quantity(n, 'n')
