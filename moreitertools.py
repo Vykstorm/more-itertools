@@ -299,6 +299,28 @@ def quantify(x: Iterable[T_co], pred: Optional[Callable[[T_co], Any]]=None) -> i
 
 
 
+def ncycles(x: Iterable[T_co], n: int) -> Iterator[T_co]:
+    '''
+    Returns a sequence with all the elements given in the iterable n times.
+    Equivalent to chain.from_iterable(repeat(tuple(x)))
+
+    e.g:
+    ''.join(ncycles('abc', 2)) -> 'abcabc'
+    ncycles(range(0, 3), 2) -> 0, 1, 2, 0, 1, 2
+
+    Note: For n > 1, this method is more memory efficient if the given input iterable is
+    a collection (implements the Collection interface) as it doesnt need to store the items temporally.
+    '''
+    if n == 0:
+        return
+    if n == 1:
+        yield from iter(x)
+
+    if not isinstance(x, Collection):
+        x = tuple(x)
+
+    for k in range(n):
+        yield from iter(x)
 
 
 # Recipe input argument checkers
@@ -371,3 +393,9 @@ def tail(x, n):
 def quantify(x, pred=None):
     _check_iterable(x)
     _check_predicate(pred)
+
+
+@checker(ncycles)
+def ncycles(x, n):
+    _check_iterable(x)
+    _check_integer(n, 'n')
