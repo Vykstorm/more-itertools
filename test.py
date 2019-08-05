@@ -272,5 +272,31 @@ class TestRecipes(TestCase):
             ))))
 
 
+
+    def test_repeatfunc(self):
+        # tuple(repeatfunc(f, n, *args, **kwargs)) == tuple(map(lambda f: f(*args, **kwargs), repeat(f, n)))
+        k = 0
+        def foo():
+            nonlocal k
+            prev, k = k, k+1
+            return prev
+
+        def bar(x):
+            nonlocal k
+            prev, k = k, k+x
+            return prev
+
+        for n in range(0, 10):
+            self.assertEqual(tuple(repeatfunc(foo, n)), tuple(range(0, n)))
+            k = 0
+            for x in range(1, 4):
+                self.assertEqual(tuple(repeatfunc(bar, n, x)), tuple(islice(count(0, x), n)))
+                k = 0
+                self.assertEqual(tuple(repeatfunc(bar, n, x=x)), tuple(islice(count(0, x), n)))
+                k = 0
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
