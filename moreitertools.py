@@ -3,6 +3,8 @@ from typing import *
 from itertools import islice, chain, filterfalse
 from functools import wraps
 from collections import deque
+from operator import truth
+
 
 # Type vars for parameter annotations
 T_co = TypeVar('T_co', covariant=True)
@@ -277,6 +279,26 @@ def tail(x: Iterable[T_co], n: int) -> Iterator[T_co]:
 
 
 
+def quantify(x: Iterable[T_co], pred: Optional[Callable[[T_co], Any]]=None) -> int:
+    '''
+    Count the number of times that the predicate is evaluated to True for the items
+    in the given iterable. If no predicate is specified, bool is used
+    Equivalent to len(tuple(filter(pred, x)))
+    e.g:
+    quantify([1, 4, 5, 9, 10], lambda x: x % 2 == 0) -> 2
+    quantify('Hello World', str.isupper) -> 2
+    '''
+    if pred is None:
+        pred = truth
+
+    c = 0
+    for item in x:
+        if pred(item):
+            c += 1
+    return c
+
+
+
 
 
 # Recipe input argument checkers
@@ -343,3 +365,9 @@ def head(x, n):
 def tail(x, n):
     _check_iterable(x)
     _check_integer(n, 'n')
+
+
+@checker(quantify)
+def quantify(x, pred=None):
+    _check_iterable(x)
+    _check_predicate(pred)

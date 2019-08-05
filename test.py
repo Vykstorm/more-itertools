@@ -247,5 +247,17 @@ class TestRecipes(TestCase):
 
 
 
+    def test_quantify(self):
+        # quantify(X, pred) == len(tuple(filter(pred, X))) for any iterable X and a predicate pred
+        for X, pred in product(self.iterables, self.predicates):
+            self.assertEqual(quantify(X, pred), len(tuple(filter(pred, X))))
+
+        # quantify(X) == quantify(X, bool) for any iterable X
+        for X in self.iterables:
+            self.assertEqual(quantify(X), quantify(X, bool))
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
