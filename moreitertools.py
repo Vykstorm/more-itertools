@@ -54,6 +54,12 @@ def _check_integer(x, param=None):
             raise TypeError(f'{type(x).__name__} is not an integer')
         raise TypeError(f'{param} must be an integer, got {type(x).__name__}')
 
+def _check_quantity(x, param=None):
+    if not isinstance(x, int) or x < 0:
+        if param is None:
+            raise TypeError(f'{type(x).__name__} is not a positive integer')
+        raise TypeError(f'{param} must be a positive integer, got {type(x).__name__ if not isinstance(x, int) else str(x)}')
+
 
 # Recipes
 
@@ -334,7 +340,7 @@ def repeatfunc(f, n: int, *args, **kwargs) -> Iterator:
     '''
     Calls the given function repeteadly n times with the given positional and keyword arguments.
     Equivalent to map(lambda f: f(*args, **kwargs), repeat(f, n))
-    
+
     e.g:
     repeatfunc(random.randrange, 5, 0, 10) -> 7, 3, 9, 1, 5
     '''
@@ -421,10 +427,10 @@ def quantify(x, pred=None):
 @checker(ncycles)
 def ncycles(x, n):
     _check_iterable(x)
-    _check_integer(n, 'n')
+    _check_quantity(n, 'n')
 
 
 @checker(repeatfunc)
 def repeatfunc(func, n):
     _check_callable(func)
-    _check_integer(n, 'n')
+    _check_quantity(n, 'n')
