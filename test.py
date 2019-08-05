@@ -258,6 +258,19 @@ class TestRecipes(TestCase):
 
 
 
+    def test_ncycles(self):
+        # len(tuple(ncycles(X, 0))) == 0 for any iterable X
+        for X in self.iterables:
+            self.assertEqual(len(tuple(ncycles(X, 0))), 0)
+
+        # tuple(ncycles(X, n)) == tuple(chain.from_iterable(repeat(tuple(x), n)))
+        # for any iterable X and n > 0
+        for X, n in product(self.iterables, range(1, 4)):
+            self.assertTrue(all(starmap(is_, zip(
+                ncycles(X, n),
+                chain.from_iterable(repeat(tuple(X), n))
+            ))))
+
 
 if __name__ == '__main__':
     unittest.main()
