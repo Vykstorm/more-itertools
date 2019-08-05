@@ -333,6 +333,8 @@ def ncycles(x: Iterable[T_co], n: int) -> Iterator[T_co]:
 def repeatfunc(f, n: int, *args, **kwargs) -> Iterator:
     '''
     Calls the given function repeteadly n times with the given positional and keyword arguments.
+    Equivalent to map(lambda f: f(*args, **kwargs), repeat(f, n))
+    
     e.g:
     repeatfunc(random.randrange, 5, 0, 10) -> 7, 3, 9, 1, 5
     '''
