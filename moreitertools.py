@@ -351,6 +351,43 @@ def repeatfunc(f, n: int, *args, **kwargs) -> Iterator:
         yield f(*args, **kwargs)
 
 
+
+def unique_everseen(x: Iterable[T_co], key: Optional[Callable[[T_co], Any]]=None) -> Iterator[T_co]:
+    '''
+    Creates an iterator that returns once all the items in the given iterable
+    (removing duplicates) and preserving the order in which they appear.
+    If key argument is indicated, it will be a function that will be used to replace
+    each item with another value to check if it was already seen before.
+
+    e.g:
+    unique_everseen('dabacaabb') -> 'd', 'a', 'b', 'c'
+    unique_everseen([1, 2, 10, 9, 1, 2, 3]) -> 1, 2, 10, 9, 3
+    unique_everseen('dABCDadd', str.lower) -> 'd', 'A', 'B', 'C'
+
+    Note: All the values in the iterable must be hashable objects unless key argument
+    is specified. In that case, the key function should returns hashable objects.
+    Otherwise, TypeError is raised
+    '''
+    s = set()
+
+    try:
+        if key is None:
+            for item in filterfalse(s.__contains__, x):
+                s.add(item)
+                yield item
+        else:
+            for item in x:
+                k = key(item)
+                if k not in s:
+                    s.add(k)
+                    yield item
+    except:
+        raise TypeError(f'All items in the iterable must be hashable')
+
+
+
+
+
 # Recipe input argument checkers
 
 @checker(first)
@@ -433,3 +470,9 @@ def ncycles(x, n):
 def repeatfunc(func, n, *args, **kwargs):
     _check_callable(func)
     _check_quantity(n, 'n')
+
+
+@checker(unique_everseen)
+def unique_everseen(x, key=None):
+    _check_iterable(x)
+    _check_predicate(key)
