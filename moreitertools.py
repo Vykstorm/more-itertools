@@ -1,8 +1,9 @@
 
 from typing import *
-from itertools import islice, chain, filterfalse
+from itertools import islice, chain, filterfalse, groupby
 from functools import wraps, partial
 from collections import deque
+from operator import itemgetter
 
 
 
@@ -370,22 +371,32 @@ def unique_everseen(x: Iterable[T_co], key: Optional[Callable[[T_co], Any]]=None
     '''
     s = set()
 
-    try:
-        if key is None:
-            for item in filterfalse(s.__contains__, x):
-                s.add(item)
+    if key is None:
+        for item in filterfalse(s.__contains__, x):
+            s.add(item)
+            yield item
+    else:
+        for item in x:
+            k = key(item)
+            if k not in s:
+                s.add(k)
                 yield item
-        else:
-            for item in x:
-                k = key(item)
-                if k not in s:
-                    s.add(k)
-                    yield item
-    except:
-        raise TypeError(f'All items in the iterable must be hashable')
 
 
 
+def unique_justseen(x: Iterable[T_co], key: Optional[Callable[[T_co], Any]]=None) -> Iterator[T_co]:
+    '''
+    Create an iterator that returns elements from the given iterable preserving the
+    order in which they appear and removing consecutive duplicates.
+
+    e.g:
+    unique_justseen('AABACDD') -> 'A', 'B', 'A', 'C', 'D'
+    unique_justseen('CCAaBE', str.lower) -> 'C', 'A', 'B', 'E'
+
+    All the items in the iterable must be hashable unless the key function is indicated.
+    In that case, values returned by key must be hashable objects.
+    '''
+    return map(next, map(itemgetter(1), groupby(x, key)))
 
 
 # Recipe input argument checkers
@@ -474,5 +485,11 @@ def repeatfunc(func, n, *args, **kwargs):
 
 @checker(unique_everseen)
 def unique_everseen(x, key=None):
+    _check_iterable(x)
+    _check_predicate(key)
+
+
+@checker(unique_justseen)
+def unique_justseen(x, key=None):
     _check_iterable(x)
     _check_predicate(key)
