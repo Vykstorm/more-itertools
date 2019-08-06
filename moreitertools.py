@@ -3,7 +3,7 @@ from typing import *
 from itertools import islice, chain, filterfalse
 from functools import wraps, partial
 from collections import deque
-from operator import truth
+
 
 
 # Type vars for parameter annotations
@@ -300,7 +300,7 @@ def quantify(x: Iterable[T_co], pred: Optional[Callable[[T_co], Any]]=None) -> i
     quantify('Hello World', str.isupper) -> 2
     '''
     if pred is None:
-        pred = truth
+        pred = bool
 
     c = 0
     for item in x:
@@ -347,9 +347,8 @@ def repeatfunc(f, n: int, *args, **kwargs) -> Iterator:
     if n == 0:
         return
 
-    f = partial(f, *args, **kwargs)
     for k in range(n):
-        yield f()
+        yield f(*args, **kwargs)
 
 
 # Recipe input argument checkers
