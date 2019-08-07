@@ -298,6 +298,7 @@ class TestRecipes(TestCase):
                 self.assertEqual(tuple(repeatfunc(bar, n, x=x)), tuple(islice(count(0, x), n)))
                 k = 0
 
+        # TODO n==None
 
 
     def test_unique_everseen(self):
@@ -374,6 +375,34 @@ class TestRecipes(TestCase):
 
         # roundrobin([0, 4, 7, 9], [1, 5, 8], [2, 6], [3]) -> range(0, 10)
         self.assertEqual(tuple(roundrobin([0, 4, 7, 9], [1, 5, 8], [2, 6], [3])), tuple(range(10)))
+
+
+
+    def test_length(self):
+        # length(X) == len(tuple(X)) for any iterable X
+        for X in self.iterables:
+            self.assertEqual(length(X), len(tuple(X)))
+
+
+
+    def test_prepend(self):
+        for X, y in product(self.iterables, sample(self.values, 10)):
+            # first(prepend(y, X)) == y for any iterable X
+            self.assertIs(first(prepend(y, X)), y)
+
+            # tuple(prepend(y, X))[1:] == tuple(X) for any iterable X
+            self.assertTrue(all(starmap(is_, zip(islice(prepend(y, X), 1, None), X))))
+
+
+
+    def test_append(self):
+        for X, y in product(self.iterables, sample(self.values, 10)):
+            # last(append(X, y)) == y for any iterable X
+            self.assertIs(last(append(X, y)), y)
+
+            # tuple(append(y, X))[:-1] == tuple(X) for any iterable X
+            self.assertTrue(all(starmap(is_, zip(tuple(append(X, y))[:-1] , X))))
+
 
 
 
