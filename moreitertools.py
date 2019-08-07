@@ -399,6 +399,41 @@ def unique_justseen(x: Iterable[T_co], key: Optional[Callable[[T_co], Any]]=None
     return map(next, map(itemgetter(1), groupby(x, key)))
 
 
+
+def roundrobin(*args: Iterable[T_co]) -> Iterator[T_co]:
+    '''
+    Takes a sequence of iterables (indicated as varadic arguments) and returns their items in a round robin fashion
+    e.g:
+    ', '.join(roundrobin('abcd', 'ef')) -> 'aebfcd'
+    roundrobin(range(0, 3), range(5, 2, -1)) -> 0, 5, 1, 4, 2, 3
+    '''
+    if len(args) == 0:
+        return
+    if len(args) == 1:
+        yield from iter(args[0])
+        return
+
+    remaining = deque()
+
+    for item in map(iter, args):
+        try:
+            yield next(item)
+            remaining.append(item)
+        except StopIteration:
+            pass
+
+    while len(remaining) > 0:
+        item = remaining.pop()
+        try:
+            yield next(item)
+            remaining.append(item)
+        except StopIteration:
+            pass
+
+
+
+
+
 # Recipe input argument checkers
 
 @checker(first)
@@ -493,3 +528,10 @@ def unique_everseen(x, key=None):
 def unique_justseen(x, key=None):
     _check_iterable(x)
     _check_predicate(key)
+
+
+@checker(roundrobin)
+def roundrobin(*args):
+    for item in args:
+        if not isinstance(item, Iterable):
+            raise TypeError('All arguments must be iterables')
