@@ -337,16 +337,19 @@ def ncycles(x: Iterable[T_co], n: int) -> Iterator[T_co]:
 
 
 
-def repeatfunc(f, n: int, *args, **kwargs) -> Iterator:
+def repeatfunc(f, n: Optional[int], *args, **kwargs) -> Iterator:
     '''
     Calls the given function repeteadly n times with the given positional and keyword arguments.
     Equivalent to map(lambda f: f(*args, **kwargs), repeat(f, n))
+    n can be set to None explictly in order to execute the function an infinite number of
+    times.
 
     e.g:
     repeatfunc(random.randrange, 5, 0, 10) -> 7, 3, 9, 1, 5
     '''
-    if n == 0:
-        return
+    if n is None:
+        while True:
+            yield f(*args, **kwargs)
 
     for k in range(n):
         yield f(*args, **kwargs)
@@ -540,7 +543,8 @@ def ncycles(x, n):
 @checker(repeatfunc)
 def repeatfunc(func, n, *args, **kwargs):
     _check_callable(func)
-    _check_quantity(n, 'n')
+    if n is not None:
+        _check_quantity(n, 'n')
 
 
 @checker(unique_everseen)
