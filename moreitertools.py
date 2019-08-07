@@ -436,6 +436,27 @@ def roundrobin(*args: Iterable[T_co]) -> Iterator[T_co]:
 
 
 
+def length(x: Iterable[T_co]) -> int:
+    '''
+    Counts the number of items in the iterable.
+    e.g:
+    length([1, 2, 3]) -> 3
+    length(filter(lambda x: x > 5, [1, 3, 9, 2, 6])) -> 2
+
+    Notes:
+    If the given iterable implements the __len__ method (is sizable), this call
+    is equivalent to len(x).
+    Otherwise, its equivalent to last(enumerate(x))[0]. That means if the given
+    argument is an iterator, it will be exhausted after executing this function.
+    '''
+    if isinstance(x, Sized):
+        return len(x)
+
+    c = 0
+    for item in x:
+        c += 1
+    return c
+
 
 
 # Recipe input argument checkers
@@ -539,3 +560,8 @@ def roundrobin(*args):
     for item in args:
         if not isinstance(item, Iterable):
             raise TypeError('All arguments must be iterables')
+
+
+@checker(length)
+def length(x):
+    _check_iterable(x)
