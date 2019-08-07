@@ -9,6 +9,7 @@ from operator import itemgetter
 
 # Type vars for parameter annotations
 T_co = TypeVar('T_co', covariant=True)
+S = TypeVar('S')
 
 
 # Helper classes & methods
@@ -461,6 +462,32 @@ def length(x: Iterable[T_co]) -> int:
     return c
 
 
+def prepend(value: S, x: Iterable[T_co]) -> Iterator[Union[S, T_co]]:
+    '''
+    Add an item in front of the iterator.
+    Equivalent to chain([value], x)
+
+    e.g:
+    prepend(1, range(10, 13)) -> 1, 10, 11, 12
+    '''
+    yield value
+    yield from x
+
+
+
+def append(x: Iterable[T_co], value: S) -> Iterator[Union[S, T_co]]:
+    '''
+    Add an iten at the end of the iterator.
+    Equivalent to chain(x, [value])
+
+    e.g:
+    append(range(1, 4), 0) -> 1, 2, 3, 0
+    '''
+    yield from x
+    yield value
+
+
+
 
 # Recipe input argument checkers
 
@@ -568,4 +595,14 @@ def roundrobin(*args):
 
 @checker(length)
 def length(x):
+    _check_iterable(x)
+
+
+@checker(prepend)
+def prepend(value, x):
+    _check_iterable(x)
+
+
+@checker(append)
+def append(x, value):
     _check_iterable(x)
