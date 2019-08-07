@@ -406,6 +406,10 @@ def roundrobin(*args: Iterable[T_co]) -> Iterator[T_co]:
     e.g:
     ', '.join(roundrobin('abcd', 'ef')) -> 'aebfcd'
     roundrobin(range(0, 3), range(5, 2, -1)) -> 0, 5, 1, 4, 2, 3
+
+    Notes:
+    If no arguments specified, returns an empty iterator.
+    If only 1 argument indicated, roundrobin its equivalent to iter: roundrobin(X) -> iter(X)
     '''
     if len(args) == 0:
         return
@@ -423,7 +427,7 @@ def roundrobin(*args: Iterable[T_co]) -> Iterator[T_co]:
             pass
 
     while len(remaining) > 0:
-        item = remaining.pop()
+        item = remaining.popleft()
         try:
             yield next(item)
             remaining.append(item)
