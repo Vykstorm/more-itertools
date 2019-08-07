@@ -323,8 +323,28 @@ class TestRecipes(TestCase):
 
 
     def test_unique_justseen(self):
-        # TODO
-        pass
+        # len(tuple(unique_justseen(X))) == 0 if X is an empty iterable
+        for X in self.empty_iterables:
+            self.assertEqual(len(tuple(unique_justseen(X))), 0)
+
+        # If X is an iterable where all items are hashable...
+        for X in self.filled_iterables:
+            try:
+                X = frozenset(X)
+            except TypeError:
+                # If X contains non hashable items, unique_justseen(X) raises TypeError
+                self.assertRaises(TypeError, unique_justseen, X)
+                continue
+
+            # There is no consecutive repeated elements in unique_justseen(X)
+            self.assertTrue(all(starmap(lambda k, g: len(tuple(g)) == 1, groupby(unique_justseen(X)))))
+
+            # set(unique_justseen(X)) <= set(X)
+            self.assertLessEqual(frozenset(unique_justseen(X)), frozenset(X))
+
+            # tuple(map(tuple(X).index, unique_everseen(unique_justseen(X)))) is a sorted array in ascendent order
+            indices = tuple(map(tuple(X).index, unique_everseen(unique_justseen(X))))
+            self.assertEqual(indices, tuple(sorted(indices)))
 
 
 
