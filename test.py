@@ -4,8 +4,11 @@
 import unittest
 from unittest import TestCase
 from itertools import *
+from functools import reduce, partial
+
+
 from moreitertools import *
-from random import choices
+from random import choices, sample
 from operator import *
 
 
@@ -295,6 +298,46 @@ class TestRecipes(TestCase):
                 self.assertEqual(tuple(repeatfunc(bar, n, x=x)), tuple(islice(count(0, x), n)))
                 k = 0
 
+
+
+    def test_unique_everseen(self):
+        # TODO
+        pass
+
+
+
+    def test_unique_justseen(self):
+        # TODO
+        pass
+
+
+
+    def test_roundrobin(self):
+        # rounbrobin() returns an empty iterator
+        self.assertEqual(len(tuple(roundrobin())), 0)
+
+        # roundrobin(X) for any iterable X returns iter(X)
+        for X in self.iterables:
+            self.assertTrue(all(starmap(is_, zip(tuple(X), tuple(roundrobin(X))))))
+
+        # len(tuple(roundrobin(x1, x2, ..., xn))) == len(tuple(chain(x1, x2, ..., xn)))
+        for k in range(1, 10):
+            args = sample(self.iterables, k)
+            self.assertEqual(reduce(add, map(len, args)), len(tuple(roundrobin(*args))))
+
+
+        # tuple(roundrobin(x1, x2, ..., xn)) returns elements inside tuple(chain(x1, x2, ..., xn))
+        for k in range(1, 10):
+            args = sample(self.iterables, k)
+            items = tuple(chain.from_iterable(args))
+            self.assertTrue(all(map(items.__contains__, roundrobin(*args))))
+
+
+        # roundrobin([0], [1, 4], [2, 5, 7], [3, 6, 8, 9]) -> range(0, 10)
+        self.assertEqual(tuple(roundrobin([0], [1, 4], [2, 5, 7], [3, 6, 8, 9])), tuple(range(10)))
+
+        # roundrobin([0, 4, 7, 9], [1, 5, 8], [2, 6], [3]) -> range(0, 10)
+        self.assertEqual(tuple(roundrobin([0, 4, 7, 9], [1, 5, 8], [2, 6], [3])), tuple(range(10)))
 
 
 
