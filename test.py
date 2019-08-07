@@ -301,8 +301,24 @@ class TestRecipes(TestCase):
 
 
     def test_unique_everseen(self):
-        # TODO
-        pass
+        # len(tuple(unique_everseen(X))) == 0 if X is an empty iterable
+        for X in self.empty_iterables:
+            self.assertEqual(len(tuple(unique_everseen(X))), 0)
+
+        # If X is an iterable where all items are hashable...
+        for X in self.filled_iterables:
+            try:
+                X = frozenset(X)
+            except TypeError:
+                # If X contains non hashable items, unique_everseen(X) raises TypeError
+                self.assertRaises(TypeError, unique_everseen, X)
+                continue
+            # set(unique_everseen(X)) == set(X)
+            self.assertEqual(X, frozenset(unique_everseen(X)))
+
+            # tuple(map(tuple(X).index, unique_everseen(X))) is a sorted array in ascendent order
+            indices = tuple(map(tuple(X).index, unique_everseen(X)))
+            self.assertEqual(indices, tuple(sorted(indices)))
 
 
 
