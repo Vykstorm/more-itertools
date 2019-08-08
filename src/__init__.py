@@ -6,6 +6,25 @@ from collections import deque
 from operator import itemgetter
 
 
+# List of public methods
+__all__ = [
+    'first', 'last', 'first_true', 'last_true', 'first_false', 'last_false',
+    'nth', 'reversediter', 'head', 'tail', 'quantify', 'ncycles', 'repeatfunc',
+    'unique_everseen', 'unique_justseen', 'roundrobin', 'length',
+    'prepend', 'append', 'partition', 'pairwise'
+]
+
+# Module attribute lookup (for python >=3.7). It will raise AttributeError if
+# trying to access interal variables
+def __getattr__(name):
+    if name not in __all__:
+        raise AttributeError(f"module {__name__} has no attribute {name}")
+    return getattr(globals(), name)
+
+def __dir__():
+    return __all__.copy()
+
+
 
 # Type vars for parameter annotations
 T_co = TypeVar('T_co', covariant=True)
