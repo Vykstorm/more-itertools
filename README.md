@@ -1,7 +1,7 @@
 
 # Introduction
 
-This module can be seen as an "extension" of the python itertools builtin library. <br/>
+This is as an "extension" of the python itertools builtin library. <br/>
 It defines a list of additional utility functions for efficient iteration (some of them are defined also in the "recipes" section of the itertools documentation page)
 
 # Prerequisites & installation
@@ -53,7 +53,7 @@ execute the next:
 python -c "import moreitertools; print(dir(moreitertools))"
 ```
 
-Use the command ```help``` or access the docstrings of the functions to get usage information:
+Issue the command ```help``` or access the docstrings of the functions to get usage information:
 
 ```python
 from moreitertools import *
