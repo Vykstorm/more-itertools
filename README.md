@@ -53,7 +53,7 @@ execute the next:
 python -c "import moreitertools; print(dir(moreitertools))"
 ```
 
-Use the command ```help``` or access the docstrings of the functions to get usage information:
+Issue the command ```help``` or access the docstrings of the functions to get usage information:
 
 ```python
 from moreitertools import *
