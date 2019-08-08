@@ -504,6 +504,25 @@ def partition(pred: Optional[Callable[[T_co], Any]], x: Iterable[T_co]) -> Tuple
 
 
 
+def pairwise(x: Iterable[T_co]) -> Iterator[Tuple[T_co, T_co]]:
+    '''
+    Given an iterable with elements x1, x2, ..., xn, creates an iterator that
+    returns the pairs (x1, x2), (x2, x3), ..., (xn-1, xn)
+
+    e.g:
+    pairwise(range(0, 4)) -> (0, 1), (1, 2), (2, 3)
+    '''
+    it = iter(x)
+    try:
+        prev = next(it)
+        while True:
+            current = next(it)
+            yield prev, current
+            prev = current
+    except StopIteration:
+        pass
+
+
 
 # Recipe input argument checkers
 
@@ -628,3 +647,8 @@ def append(x, value):
 def partition(pred, x):
     _check_iterable(x)
     _check_predicate(pred)
+
+
+@checker(pairwise)
+def pairwise(x):
+    _check_iterable(x)
