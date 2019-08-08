@@ -41,8 +41,46 @@ unique_everseen('BCADABCE') # 'B','C','A','D','E'
 
 # Execute a function n times
 repeatfunc(randrange, 4, start=0, stop=10) # 7, 0, 5, 6
+```
+There is additionaly a useful tool called ```debugiter``` that will help you debugging your code when working with complex iterators:
+```python
+from moreitertools import *
+
+# Returns even numbers multiplied by 2 and odd multiplied by 3
+it = roundrobin(
+    map(lambda x: x * 2, range(0, 100, 2)),
+    map(lambda x: x * 3, range(1, 100, 2))
+)
+print(debugiter(it))
+```
+The output will be:
+```
+0, 3, 4, 9, 8, 15, 12, 21, 16, 27, ..., 285, 192, 291, 196, 297  (100 items in total)
+```
+
+ debugiter will show part of the content and the number of items inside the iterator
+
+Also you can interactively debug the iterator while iterating over it:
+
+```python
+it = debugiter(range(0, 60, 3))
+print(it)
+print('Next item is: ', next(it))
+print(it)
+print('Next item is: ', next(it))
+print(it)
 
 ```
+Output:
+```
+0, 3, 6, 9, 12, 15, 18, 21, 24, 27, ..., 45, 48, 51, 54, 57  (20 items in total)
+Next item is 0
+3, 6, 9, 12, 15, 18, 21, 24, 27, 30, ..., 45, 48, 51, 54, 57  (19 items in total)
+Next item is 3
+6, 9, 12, 15, 18, 21, 24, 27, 30, 33, ..., 45, 48, 51, 54, 57  (18 items in total)
+
+```
+
 
 
 # Documentation
