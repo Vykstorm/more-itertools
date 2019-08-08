@@ -488,6 +488,22 @@ def append(x: Iterable[T_co], value: S) -> Iterator[Union[S, T_co]]:
 
 
 
+def partition(pred: Optional[Callable[[T_co], Any]], x: Iterable[T_co]) -> Tuple[Iterator[T_co], Iterator[T_co]]:
+    '''
+    Creates two iterators. The first returns the items in the given iterable for which the
+    predicate is evaluated to True and the second, those for that the predicate is False.
+    If the predicate is None, bool is used by default
+
+    Equivalent to (filter(pred, x), filterfalse(pred, x))
+
+    e.g:
+    map(list, partition(lambda x: x >= 3, range(0, 6))) -> [0, 1, 2], [3, 4, 5]
+    map(str, partition(str.isupper, 'Hello World')) -> 'HW', 'ello orld'
+    '''
+    return filter(pred, x), filterfalse(pred, x)
+
+
+
 
 # Recipe input argument checkers
 
@@ -606,3 +622,9 @@ def prepend(value, x):
 @checker(append)
 def append(x, value):
     _check_iterable(x)
+
+
+@checker(partition)
+def partition(pred, x):
+    _check_iterable(x)
+    _check_predicate(pred)
