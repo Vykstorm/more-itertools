@@ -405,6 +405,26 @@ class TestRecipes(TestCase):
 
 
 
+    def test_partition(self):
+        for X, pred in product(self.iterables, self.predicates):
+            # tuple(partition(pred, X)[0]) == tuple(filter(pred, X))
+            self.assertTrue(all(starmap(is_, zip(partition(pred, X)[0], filter(pred, X)))))
+
+            # tuple(partition(pred, X)[1]) == tuple(filterfalse(pred, X))
+            self.assertTrue(all(starmap(is_, zip(partition(pred, X)[1], filterfalse(pred, X)))))
+
+
+
+    def test_pairwise(self):
+        for n in range(0, 10):
+            # tuple(map(itemgetter(0), pairwise(range(n)))) == tuple(range(0, n-1))
+            self.assertEqual(tuple(map(itemgetter(0), pairwise(range(n)))), tuple(range(0, n-1)))
+
+            # tuple(map(itemgetter(1), pairwise(range(n)))) == tuple(range(1, n))
+            self.assertEqual(tuple(map(itemgetter(1), pairwise(range(n)))), tuple(range(1, n)))
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
