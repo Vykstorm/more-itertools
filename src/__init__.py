@@ -1,9 +1,10 @@
 
 from typing import *
-from itertools import islice, chain, filterfalse, groupby
+from itertools import islice, chain, filterfalse, groupby, tee
 from functools import wraps, partial
 from collections import deque
 from operator import itemgetter
+from math import ceil, floor
 
 
 # List of public methods
@@ -11,7 +12,7 @@ __all__ = [
     'first', 'last', 'first_true', 'last_true', 'first_false', 'last_false',
     'nth', 'reversediter', 'head', 'tail', 'quantify', 'ncycles', 'repeatfunc',
     'unique_everseen', 'unique_justseen', 'roundrobin', 'length',
-    'prepend', 'append', 'partition', 'pairwise'
+    'prepend', 'append', 'partition', 'pairwise', 'debugiter'
 ]
 
 # Module attribute lookup (for python >=3.7). It will raise AttributeError if
@@ -543,6 +544,63 @@ def pairwise(x: Iterable[T_co]) -> Iterator[Tuple[T_co, T_co]]:
 
 
 
+class DebugIterator(Iterator):
+    '''
+    Helper class to debug iterators (used by debugiter)
+    '''
+    def __init__(self, it):
+        self.it = it
+
+    def __next__(self):
+        return next(self.it)
+
+    def __str__(self):
+        n, m = 501, 15
+
+        it, self.it = tee(iter(self.it), 2)
+        a, b, c = tee(islice(it, n), 3)
+
+        k = length(a)
+        if k == 0:
+            return 'empty iterator'
+        if k <= m:
+            return ', '.join(map(str, b))
+        else:
+            if k < n:
+                return "{}, ..., {}  ({} items in total)".format(
+                    ', '.join(map(str, head(b, 2 * m // 3))),
+                    ', '.join(map(str, tail(c, m // 3))),
+                    k
+                )
+            return "{}, ...  (more than {} items)".format(
+                ', '.join(map(str, head(b, m))),
+                n-1
+            )
+
+    def __repr__(self):
+        return str(self)
+
+
+def debugiter(x: Iterable[T_co]) -> Iterator[T_co]:
+    '''
+    This method creates an iterator that is used to show information about the content of the given
+    iterable x:
+    The created iterator behaves just like iter(x) but also exposes the methods __str__ and __repr__ to print debug information.
+
+    e.g:
+    it = debugiter(range(0, 200))
+    print(it) -> "0, 1, 2, 3, ..., 197, 198, 199  (200 items in total)"
+
+    next(it) -> 0
+    next(it) -> 1
+    print(it) -> "2, 3, 4, 5, ..., 197, 198, 199  (198 items in total)"
+    '''
+    return DebugIterator(iter(x))
+
+
+
+
+
 # Recipe input argument checkers
 
 @checker(first)
@@ -670,4 +728,9 @@ def partition(pred, x):
 
 @checker(pairwise)
 def pairwise(x):
+    _check_iterable(x)
+
+
+@checker(debugiter)
+def debugiter(x):
     _check_iterable(x)
