@@ -1,4 +1,10 @@
 
+'''
+Tests for all the recipes defined in this library.
+To run them, go the root directory and execute the next cmd bash lines:
+export PYTHONPATH=$(pwd)
+python tests/tests_recipes.py
+'''
 
 
 import unittest
@@ -7,7 +13,7 @@ from itertools import *
 from functools import reduce, partial
 
 
-from moreitertools import *
+from src import *
 from random import choices, sample
 from operator import *
 
