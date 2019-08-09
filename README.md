@@ -22,6 +22,7 @@ python setup.py install
 from itertools import *
 from moreitertools import *
 from random import randrange
+from operator import lt
 
 # Find the first number greater than zero
 first_true([-1, 2, 0, -3, 4], pred=lambda x: x > 0) # 2
@@ -41,6 +42,10 @@ unique_everseen('BCADABCE') # 'B','C','A','D','E'
 
 # Execute a function n times
 repeatfunc(randrange, 4, start=0, stop=10) # 7, 0, 5, 6
+
+# Search the last item in a sequence higher than the previous one
+X = [4, 0, 0, -1, 4, 3, 5, 1]
+last_true(starmap(lambda x, y: y if y > x else 0, pairwise(X))) # 5
 ```
 There is additionaly a useful tool called ```debugiter``` that will help you debugging your code when working with complex iterators:
 ```python
