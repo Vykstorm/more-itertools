@@ -560,7 +560,7 @@ class DebugIterator(Iterator):
         it, self.it = tee(iter(self.it), 2)
         a, b, c = tee(islice(it, n), 3)
 
-        k = length(a)
+        k = length.unchecked(a)
         if k == 0:
             return 'empty iterator'
         if k <= m:
@@ -568,12 +568,12 @@ class DebugIterator(Iterator):
         else:
             if k < n:
                 return "{}, ..., {}  ({} items in total)".format(
-                    ', '.join(map(str, head(b, 2 * m // 3))),
+                    ', '.join(map(str, head.unchecked(b, 2 * m // 3))),
                     ', '.join(map(str, tail(c, m // 3))),
                     k
                 )
             return "{}, ...  (more than {} items)".format(
-                ', '.join(map(str, head(b, m))),
+                ', '.join(map(str, head.unchecked(b, m))),
                 n-1
             )
 
