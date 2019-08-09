@@ -544,6 +544,64 @@ def pairwise(x: Iterable[T_co]) -> Iterator[Tuple[T_co, T_co]]:
 
 
 
+def slides(x: Iterable[T_co], n: int=2, s: int=1) -> Iterator[T_co]:
+    '''
+    Returns windows of size n in the given iterable sequence.
+    e.g:
+    slides(range(0, 5), 3) -> (0, 1, 2), (1, 2, 3), (2, 3, 4)
+    map(str, slides('abcd'), 2) -> 'ab', 'bc', 'cd'
+
+    You can use the parameter s to indicate the number of positions to slide
+    the window on each step (by default 1).
+
+    e.g:
+    slides(range(0, 5), 3, 2) -> (0, 1, 2), (2, 3, 4)
+
+    Notes:
+    slides(x, n=2, s=1), its equivalent to pairwise(x)
+    '''
+    if s == 1:
+        if isinstance(x, Sized):
+            m = len(x)
+            if n == m:
+                yield tuple(x)
+                return
+            if n > m:
+                return
+
+        if n == 1:
+            while True:
+                for item in x:
+                    yield (item,)
+            return
+
+        if n == 2:
+            yield from pairwise(x)
+            return
+
+
+    it, w = iter(x), deque(maxlen=n)
+    try:
+        if s < n:
+            while True:
+                while len(w) < n:
+                    w.append(next(it))
+                yield tuple(w)
+                for k in range(s):
+                    w.popleft()
+        else:
+            while True:
+                for k in range(n):
+                    w.append(next(it))
+                yield tuple(w)
+                for k in range(s-n):
+                    next(it)
+
+    except StopIteration:
+        pass
+
+
+
 class _DebugIterator(Iterator):
     '''
     Helper class to debug iterators (used by debugiter)
@@ -734,3 +792,10 @@ def pairwise(x):
 @checker(debugiter)
 def debugiter(x):
     _check_iterable(x)
+
+
+@checker(slides)
+def slides(x, n=2, s=1):
+    _check_iterable(x)
+    _check_quantity(n, 'window size')
+    _check_quantity(s, 'strides')
