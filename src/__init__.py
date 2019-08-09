@@ -570,9 +570,8 @@ def slides(x: Iterable[T_co], n: int=2, s: int=1) -> Iterator[T_co]:
                 return
 
         if n == 1:
-            while True:
-                for item in x:
-                    yield (item,)
+            for item in x:
+                yield (item,)
             return
 
         if n == 2:
