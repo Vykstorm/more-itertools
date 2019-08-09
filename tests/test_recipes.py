@@ -62,6 +62,14 @@ class TestRecipes(TestCase):
         self.non_callables = tuple(filterfalse(callable, self.values))
 
 
+    def assertAllTrue(self, X):
+        # Raises an assertion if one of the items in the iterable is not evaluated to True
+        self.assertTrue(all(X))
+
+    def assertAnyTrue(self, X):
+        # Raises an assertion if all of the items in the iterable are evaluated to False
+        self.assertTrue(any(X))
+
 
     def test_first(self):
         # first(X) raises ValueError and first(X, default) == default if len(tuple(X)) == 0
@@ -442,6 +450,33 @@ class TestRecipes(TestCase):
 
 
 
+    def test_slides(self):
+        # slides(X, n=1, s=1) == map(lambda v: (v,), iter(X))
+        for X in self.iterables:
+            self.assertAllTrue(starmap(is_, zip(map(first, slides(X, n=1, s=1)), X)))
+
+        # map(length, slides(X, n, s)) -> n, n, n, ...
+        for X, n, s in zip(sample(self.iterables, 20), range(1, 8), range(1, 4)):
+            self.assertEqual(
+                length(filter(partial(ne, n), map(length, slides(X, n, s)))),
+                0
+            )
+
+        # slides(X, n=2, s=1) == pairwise(X)
+        for X in self.iterables:
+            self.assertAllTrue(starmap(eq, zip(slides(X, n=2, s=1), pairwise(X))))
+
+        # map(first, slides(range(0, k), n, s)) -> 0, n+s, 2*(n+s), ...
+        for k, n, s in product(range(1, 10), range(1, 8), range(1, 4)):
+            X = range(0, k)
+            self.assertAllTrue(starmap(eq, zip(map(first, slides(X, n, s)), range(0, k, s))))
+
+
+        # slides(X, n=len(tuple(X))) -> tuple(X) with len(tuple(X)) > 0
+        for X in self.filled_iterables:
+            n = len(tuple(X))
+            self.assertEqual(length(slides(X, n)), 1)
+            self.assertEqual(length(first(slides(X, n))), n)
 
 
 if __name__ == '__main__':
