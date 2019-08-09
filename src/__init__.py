@@ -12,7 +12,7 @@ __all__ = [
     'first', 'last', 'first_true', 'last_true', 'first_false', 'last_false',
     'nth', 'reversediter', 'head', 'tail', 'quantify', 'ncycles', 'repeatfunc',
     'unique_everseen', 'unique_justseen', 'roundrobin', 'length',
-    'prepend', 'append', 'partition', 'pairwise', 'debugiter'
+    'prepend', 'append', 'partition', 'pairwise', 'slides', 'debugiter'
 ]
 
 # Module attribute lookup (for python >=3.7). It will raise AttributeError if
