@@ -431,6 +431,18 @@ class TestRecipes(TestCase):
 
 
 
+    def test_debugiter(self):
+        # tuple(debugiter(X)) == tuple(iter(X))
+        for X in self.iterables:
+            self.assertTrue(all(starmap(is_, zip(tuple(X), tuple(debugiter(X))))))
+
+        # str(debugiter(repeat(k))) does halt, but tuple(debugiter(repeat(k))) runs forever
+        str(debugiter(repeat(0)))
+        repr(debugiter(repeat(0)))
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
