@@ -544,7 +544,7 @@ def pairwise(x: Iterable[T_co]) -> Iterator[Tuple[T_co, T_co]]:
 
 
 
-class DebugIterator(Iterator):
+class _DebugIterator(Iterator):
     '''
     Helper class to debug iterators (used by debugiter)
     '''
@@ -595,7 +595,7 @@ def debugiter(x: Iterable[T_co]) -> Iterator[T_co]:
     next(it) -> 1
     print(it) -> "2, 3, 4, 5, ..., 197, 198, 199  (198 items in total)"
     '''
-    return DebugIterator(iter(x))
+    return _DebugIterator(iter(x))
 
 
 
