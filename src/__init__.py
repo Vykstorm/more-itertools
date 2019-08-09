@@ -576,7 +576,7 @@ def slides(x: Iterable[T_co], n: int=2, s: int=1) -> Iterator[T_co]:
             return
 
         if n == 2:
-            yield from pairwise(x)
+            yield from pairwise.unchecked(x)
             return
 
 
