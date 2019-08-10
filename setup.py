@@ -10,7 +10,7 @@ from setuptools import setup
 if __name__ == '__main__':
     setup(
         name='more-itertools',
-        version='1.0.2',
+        version='1.1.2',
         description='An extension of the standard python module itertools',
         author='Vykstorm',
         author_email='victorruizgomezdev@gmail.com',
