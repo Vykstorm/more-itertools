@@ -15,7 +15,7 @@ from typing import *
 # Description shown at start-up
 DESCRIPTION =\
 '''This is an interactive prompt designed to test iterators.
-All the functions defined by moreitertools, as well as functools, itertools, operator are already imported and ready to use.
+All the functions defined by moreitertools as well as functools, itertools and operator are already imported and ready to use.
 You can visualize and debug part of the contents of an iterator by typing it in the console.
 '''
 
